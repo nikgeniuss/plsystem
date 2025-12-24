@@ -1,6 +1,6 @@
 // ========== НАСТРОЙКИ ==========
 const SITE_URL = 'https://nikgeniuss.github.io/test/';
-const GITHUB_TOKEN = 'ВАШ_GITHUB_TOKEN'; // Нужно создать!
+const GITHUB_TOKEN = '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'; // Нужно создать!
 const REPO_OWNER = 'nikgeniuss'; // Ваш логин GitHub
 const REPO_NAME = 'plsystem'; // Ваш репозиторий
 const FILE_PATH = 'users.json'; // Файл для хранения данных
