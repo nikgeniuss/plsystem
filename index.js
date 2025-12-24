@@ -61,10 +61,10 @@ async function saveToGitHub(user, env) {
       return false;
     }
     
-    // 3. ПРЯМАЯ ПРОВЕРКА API С ЭТИМ ТОКЕНОМ
+        // 3. ПРЯМАЯ ПРОВЕРКА API С ЭТИМ ТОКЕНОМ
     console.log('🔄 Тестирую GitHub API напрямую...');
     const testResponse = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/test.txt`,
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`,
       {
         headers: {
           'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -76,11 +76,13 @@ async function saveToGitHub(user, env) {
     
     console.log(`📡 GitHub API тест: статус ${testResponse.status} ${testResponse.statusText}`);
     
-    if (!testResponse.ok) {
+    if (testResponse.status === 401 || testResponse.status === 403) {
       const errorText = await testResponse.text();
-      console.error('❌ GitHub API тест провален:', errorText.slice(0, 200));
+      console.error('❌ GitHub API тест провален (ошибка доступа):', errorText.slice(0, 200));
       return false;
     }
+    
+    // Если репозиторий доступен (200, 404 для файла - ок), продолжаем
     
     // 4. Получаем или создаём файл
     const { content, sha } = await getOrCreateFile(GITHUB_TOKEN);
