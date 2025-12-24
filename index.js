@@ -61,7 +61,7 @@ async function saveToGitHub(user, env) {
       return false;
     }
     
-        // 3. ПРЯМАЯ ПРОВЕРКА API С ЭТИМ ТОКЕНОМ
+    // 3. ПРЯМАЯ ПРОВЕРКА API С ЭТИМ ТОКЕНОМ
     console.log('🔄 Тестирую GitHub API напрямую...');
     const testResponse = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`,
@@ -82,11 +82,23 @@ async function saveToGitHub(user, env) {
       return false;
     }
     
-    // Если репозиторий доступен (200, 404 для файла - ок), продолжаем
-    
     // 4. Получаем или создаём файл
     const { content, sha } = await getOrCreateFile(GITHUB_TOKEN);
-    let users = content ? JSON.parse(content) : [];
+    
+    // Безопасный парсинг JSON
+    let users = [];
+    if (content && content.trim() !== '') {
+      try {
+        users = JSON.parse(content);
+        console.log(`📊 Загружено ${users.length} пользователей из файла`);
+      } catch (parseError) {
+        console.error('❌ Ошибка парсинга JSON:', parseError.message);
+        // Если файл битый, начинаем с пустого массива
+        users = [];
+      }
+    } else {
+      console.log('📄 Файл пустой или отсутствует, начинаем новый массив');
+    }
     
     // 5. Добавляем/обновляем пользователя
     const newUser = {
@@ -127,16 +139,25 @@ async function getOrCreateFile(GITHUB_TOKEN) {
     
     if (response.status === 200) {
       const data = await response.json();
-      const content = atob(data.content.replace(/\n/g, ''));
-      return { content, sha: data.sha };
+      // Безопасное декодирование
+      const fileContent = data.content.replace(/\n/g, '');
+      try {
+        const content = atob(fileContent);
+        return { content, sha: data.sha };
+      } catch (decodeError) {
+        console.error('❌ Ошибка декодирования base64:', decodeError.message);
+        // Если файл пустой или битый, считаем его новым
+        return { content: null, sha: null };
+      }
     }
     
     if (response.status === 404) {
-      console.log('📄 Файла нет, будет создан');
+      console.log('📄 Файла users.json нет, будет создан');
       return { content: null, sha: null };
     }
     
-    console.error(`❌ GitHub getFile: ${response.status}`);
+    // Любая другая ошибка от GitHub
+    console.error(`❌ GitHub getFile: ${response.status}`, await response.text());
     return { content: null, sha: null };
     
   } catch (error) {
