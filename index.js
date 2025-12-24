@@ -1,6 +1,9 @@
 // ========== НАСТРОЙКИ ==========
 const SITE_URL = 'https://nikgeniuss.github.io/test/';
-
+// ↓↓↓ ДОБАВЬТЕ ЭТИ 2 СТРОКИ ↓↓↓
+const SUPABASE_URL = 'https://xxihcevqsnatodummbnj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4aWhjZXZxc25hdG9kdW1tYm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyNTI4OTksImV4cCI6MjA4MTgyODg5OX0.DTNpJUOA6T9vLvhYepODnPLS6L6hz3N7lxYsCAj8P5M';
+// ↑↑↑ ДОБАВЬТЕ ЭТИ 2 СТРОКИ ↑↑↑
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
