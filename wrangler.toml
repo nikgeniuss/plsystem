@@ -1,6 +1,3 @@
 name = "testex-bot"
 compatibility_date = "2025-01-01"
 main = "index.js"
-
-[vars]
-BOT_TOKEN = "8328868978:AAHStw9_xFdQHh8_AX9dp8LlIyay7cQodB0"
