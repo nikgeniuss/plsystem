@@ -1,0 +1,11 @@
+{
+  "name": "testex-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for Testex platform",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "license": "MIT"
+}
