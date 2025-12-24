@@ -4,16 +4,6 @@ const REPO_OWNER = 'nikgeniuss';
 const REPO_NAME = 'plsystem';
 const FILE_PATH = 'users.json';
 
-// GitHub Token разделён на части (защита от детекта)
-const GITHUB_TOKEN_PARTS = [
-  'ghp_canesgIjRVScX',  // Часть 1
-  '07mUJtoKwrN7LEsNc3',  // Часть 2
-  'eIo2U'               // Часть 3
-];
-
-// Собираем полный токен
-const GITHUB_TOKEN = GITHUB_TOKEN_PARTS.join('');
-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -48,7 +38,7 @@ async function handleUpdate(update, env, ctx) {
   console.log(`📨 /start от ${user.id} (@${user.username || 'нет'})`);
   
   if (message.text.startsWith('/start')) {
-    const saved = await saveToGitHub(user);
+    const saved = await saveToGitHub(user, env);
     ctx.waitUntil(sendTelegramResponse(BOT_TOKEN, chatId, user, saved));
   }
   
@@ -56,13 +46,47 @@ async function handleUpdate(update, env, ctx) {
 }
 
 // ========== СОХРАНЕНИЕ В GITHUB ==========
-async function saveToGitHub(user) {
+async function saveToGitHub(user, env) {
   try {
-    // 1. Получаем или создаём файл
-    const { content, sha } = await getOrCreateFile();
+    // 1. Получаем токен из env
+    const GITHUB_TOKEN = env.GITHUB_TOKEN;
+    
+    // ВРЕМЕННАЯ ОТЛАДКА: выводим первые 5 символов токена для проверки
+    console.log('🔐 Токен из env (первые 5 символов):', GITHUB_TOKEN ? GITHUB_TOKEN.substring(0, 5) + '...' : 'ТОКЕН ОТСУТСТВУЕТ!');
+    console.log('🔐 Полная длина токена:', GITHUB_TOKEN ? GITHUB_TOKEN.length : '0');
+    
+    // 2. Проверяем, что токен вообще есть
+    if (!GITHUB_TOKEN) {
+      console.error('❌ FATAL: GITHUB_TOKEN не определён в env');
+      return false;
+    }
+    
+    // 3. ПРЯМАЯ ПРОВЕРКА API С ЭТИМ ТОКЕНОМ
+    console.log('🔄 Тестирую GitHub API напрямую...');
+    const testResponse = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/test.txt`,
+      {
+        headers: {
+          'Authorization': `Bearer ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Telegram-Bot-1.0'
+        }
+      }
+    );
+    
+    console.log(`📡 GitHub API тест: статус ${testResponse.status} ${testResponse.statusText}`);
+    
+    if (!testResponse.ok) {
+      const errorText = await testResponse.text();
+      console.error('❌ GitHub API тест провален:', errorText.slice(0, 200));
+      return false;
+    }
+    
+    // 4. Получаем или создаём файл
+    const { content, sha } = await getOrCreateFile(GITHUB_TOKEN);
     let users = content ? JSON.parse(content) : [];
     
-    // 2. Добавляем/обновляем пользователя
+    // 5. Добавляем/обновляем пользователя
     const newUser = {
       id: user.id,
       username: user.username || '',
@@ -76,8 +100,8 @@ async function saveToGitHub(user) {
     users = users.filter(u => u.id !== user.id);
     users.push(newUser);
     
-    // 3. Сохраняем
-    return await updateFile(users, sha);
+    // 6. Сохраняем
+    return await updateFile(users, sha, GITHUB_TOKEN);
     
   } catch (error) {
     console.error('❌ Ошибка GitHub:', error.message);
@@ -86,7 +110,7 @@ async function saveToGitHub(user) {
 }
 
 // ========== РАБОТА С ФАЙЛАМИ GITHUB ==========
-async function getOrCreateFile() {
+async function getOrCreateFile(GITHUB_TOKEN) {
   try {
     const response = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
@@ -110,16 +134,16 @@ async function getOrCreateFile() {
       return { content: null, sha: null };
     }
     
-    console.error(`❌ GitHub: ${response.status}`);
+    console.error(`❌ GitHub getFile: ${response.status}`);
     return { content: null, sha: null };
     
   } catch (error) {
-    console.error('❌ Ошибка запроса:', error.message);
+    console.error('❌ Ошибка запроса getFile:', error.message);
     return { content: null, sha: null };
   }
 }
 
-async function updateFile(users, sha) {
+async function updateFile(users, sha, GITHUB_TOKEN) {
   try {
     const content = JSON.stringify(users, null, 2);
     const encodedContent = btoa(unescape(encodeURIComponent(content)));
@@ -147,12 +171,12 @@ async function updateFile(users, sha) {
       return true;
     } else {
       const error = await response.text();
-      console.error('❌ GitHub API:', error.slice(0, 200));
+      console.error('❌ GitHub API updateFile:', error.slice(0, 200));
       return false;
     }
     
   } catch (error) {
-    console.error('❌ Ошибка сохранения:', error.message);
+    console.error('❌ Ошибка сохранения updateFile:', error.message);
     return false;
   }
 }
