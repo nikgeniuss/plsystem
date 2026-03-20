@@ -1,1 +1,24 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай число</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Угадай число от 1 до 100</h1>
+        <div class="game-info">
+            <p>Попытка: <span id="attempt">0</span>/7</p>
+            <p id="hint">Введите число и нажмите "Проверить"</p>
+        </div>
+        <input type="number" id="guessInput" min="1" max="100" placeholder="Ваше число">
+        <button onclick="checkGuess()">Проверить</button>
+        <button onclick="newGame()">Новая игра</button>
+        <p id="message"></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
