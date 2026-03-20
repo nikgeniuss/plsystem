@@ -8,7 +8,7 @@ import os
 logging.basicConfig(level=logging.INFO)
 
 # Замените на ваш токен от @BotFather
-BOT_TOKEN = os.getenv('BOT_TOKEN', 'ВАШ_ТОКЕН_БОТА')
+BOT_TOKEN = os.getenv('8328868978:AAHStw9_xFdQHh8_AX9dp8LlIyay7cQodB0')
 # Замените на ваш GitHub Pages URL после публикации
 GAME_URL = os.getenv('GAME_URL', 'https://ВАШ_АККАУНТ.github.io/tg-guess-game/frontend/')
 
