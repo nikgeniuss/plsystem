@@ -8,9 +8,9 @@ import os
 logging.basicConfig(level=logging.INFO)
 
 # Замените на ваш токен от @BotFather
-BOT_TOKEN = os.getenv('8328868978:AAHStw9_xFdQHh8_AX9dp8LlIyay7cQodB0')
+BOT_TOKEN = os.getenv("8328868978:AAHStw9_xFdQHh8_AX9dp8LlIyay7cQodB0")
 # Замените на ваш GitHub Pages URL после публикации
-GAME_URL = os.getenv('https://nikgeniuss.github.io/plsystem/')
+GAME_URL = os.getenv("https://nikgeniuss.github.io/plsystem/")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
